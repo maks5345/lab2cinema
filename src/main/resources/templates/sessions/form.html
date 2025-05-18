@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${movieSession.id == null} ? 'Новий сеанс' : 'Редагування сеансу'">Форма сеансу</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+
+
+
+
+<div class="container mt-5">
+    <h2 th:text="${movieSession.id == null} ? 'Новий сеанс' : 'Редагування сеансу'"></h2>
+
+    <form th:action="@{/sessions}" th:object="${movieSession}" method="post">
+
+        <!-- Додано поле для id, щоб редагування працювало -->
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="mb-3">
+            <label for="movieName" class="form-label">Назва фільму</label>
+            <input type="text" id="movieName" th:field="*{movieName}" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="sessionTime" class="form-label">Дата і час</label>
+            <input type="datetime-local" id="sessionTime" th:field="*{sessionTime}" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Зберегти</button>
+        <a href="/sessions" class="btn btn-secondary ms-2">Скасувати</a>
+
+    </form>
+</div>
+
+</body>
+</html>
