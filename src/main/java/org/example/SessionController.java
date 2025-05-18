@@ -1,6 +1,7 @@
 package org.example;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,13 +13,16 @@ public class SessionController {
 
     private final SessionRepository sessionRepository;
     private final CinemaRepository cinemaRepository;
+    private final TicketRepository ticketRepository;
 
-    public SessionController(SessionRepository sessionRepository, CinemaRepository cinemaRepository) {
+    public SessionController(SessionRepository sessionRepository,
+                             CinemaRepository cinemaRepository,
+                             TicketRepository ticketRepository) {
         this.sessionRepository = sessionRepository;
         this.cinemaRepository = cinemaRepository;
+        this.ticketRepository = ticketRepository;
     }
 
-    // Список сеансів
     @GetMapping
     public String listSessions(Model model) {
         List<Session> sessions = sessionRepository.findAll();
@@ -28,19 +32,15 @@ public class SessionController {
 
     @GetMapping("/")
     public String home() {
-        return "index"; // повертає index.html з templates
+        return "index";
     }
 
-
-
-    // Форма створення нового сеансу
     @GetMapping("/new")
     public String createSessionForm(Model model) {
         model.addAttribute("movieSession", new Session());
         return "sessions/form";
     }
 
-    // Форма редагування сеансу
     @GetMapping("/{id}")
     public String editSessionForm(@PathVariable Long id, Model model) {
         Session session = sessionRepository.findById(id)
@@ -49,10 +49,8 @@ public class SessionController {
         return "sessions/form";
     }
 
-    // Збереження (створення або оновлення)
     @PostMapping
     public String saveSession(@ModelAttribute("movieSession") Session session) {
-        // Прив’язуємо завжди до кінотеатру з id=1 (або створюємо його)
         Cinema cinema = cinemaRepository.findById(1L).orElseGet(() -> {
             Cinema c = new Cinema();
             c.setName("Мій кінотеатр");
@@ -64,10 +62,29 @@ public class SessionController {
         return "redirect:/sessions";
     }
 
-    // Видалення сеансу
-    @GetMapping("/delete/{id}")
-    public String deleteSession(@PathVariable Long id) {
+    // Додано @Transactional для відкриття транзакції під час видалення
+    @Transactional
+    @PostMapping("/delete/{id}")
+    public String deleteSession(@PathVariable Long id,
+                                @RequestParam(required = false, defaultValue = "false") boolean deleteTickets,
+                                Model model) {
+
+        long ticketsCount = ticketRepository.countBySessionId(id);
+
+        if (ticketsCount > 0 && !deleteTickets) {
+            // Якщо є квитки і не підтверджено їх видалення — показати підтвердження
+            model.addAttribute("sessionId", id);
+            model.addAttribute("ticketsCount", ticketsCount);
+            return "sessions/confirmDelete";
+        }
+
+        if (deleteTickets) {
+            // Видаляємо спочатку всі квитки для цього сеансу
+            ticketRepository.deleteBySessionId(id);
+        }
+        // Потім видаляємо сам сеанс
         sessionRepository.deleteById(id);
+
         return "redirect:/sessions";
     }
 }

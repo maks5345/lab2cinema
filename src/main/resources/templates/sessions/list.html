@@ -44,11 +44,11 @@
             <td th:text="${#temporals.format(movieSession.sessionTime, 'yyyy-MM-dd HH:mm')}">2025-05-20 19:00</td>
             <td>
                 <a th:href="@{'/sessions/' + ${movieSession.id}}" class="btn btn-primary btn-sm">Редагувати</a>
-                <a th:href="@{'/sessions/delete/' + ${movieSession.id}}"
-                   class="btn btn-danger btn-sm"
-                   onclick="return confirm('Ви впевнені, що хочете видалити цей сеанс?');">
-                    Видалити
-                </a>
+
+                <form th:action="@{'/sessions/delete/' + ${movieSession.id}}" method="post" style="display:inline;"
+                      onsubmit="return confirm('Ви впевнені, що хочете видалити цей сеанс?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
+                </form>
             </td>
         </tr>
         </tbody>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Підтвердження видалення сеансу</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+
+    <h3>Сеанс має <span th:text="${ticketsCount}"></span> квитків.</h3>
+    <p>Що зробити?</p>
+
+    <form th:action="@{'/sessions/delete/' + ${sessionId}}" method="post">
+        <input type="hidden" name="deleteTickets" value="true"/>
+        <button type="submit" class="btn btn-danger">Видалити сеанс разом із квитками</button>
+        <a href="/sessions" class="btn btn-secondary ms-2">Скасувати</a>
+    </form>
+
+</div>
+</body>
+</html>
